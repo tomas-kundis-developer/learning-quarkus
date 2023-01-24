@@ -108,14 +108,18 @@
     </build>
     <profiles>
         <profile>
+            <!-- Specifies the ID of the profile when activating with -Pnative -->
             <id>native</id>
             <activation>
                 <property>
+                    <!-- Defines a flag that when present will activate the profile, -Dnative -->
                     <name>native</name>
                 </property>
             </activation>
             <properties>
                 <skipITs>false</skipITs>
+                <!-- Tells the Quarkus Maven plugin to build a native executable
+                in addition to the usual Java JAR runner -->
                 <quarkus.package.type>native</quarkus.package.type>
             </properties>
         </profile>
