@@ -23,8 +23,10 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 // Quarkus defaults JAX-RS resources to @Singleton
-// @TODO 2023-01-26 TOKU: Apply JSON as HTTP media type on class-level. Remove from methods.
 @Path("/accounts")
+// Indicates the response and request are converted to JSON
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class AccountResource {
 
   @Inject
@@ -34,8 +36,6 @@ public class AccountResource {
    * Returns a Set of Account objects.
    */
   @GET
-  // Indicates the response is converted to JSON
-  @Produces(MediaType.APPLICATION_JSON)
   public List<Account> allAccounts() {
     return entityManager
         // Tells the entityManager to use the named query "Accounts.findAll" defined on Account
@@ -48,7 +48,6 @@ public class AccountResource {
   @GET
   // Defines the name of the parameter on the URL path
   @Path("/{accountNumber}")
-  @Produces(MediaType.APPLICATION_JSON)
   // @PathParam maps the accountNumber URL parameter into the accountNumber method parameter.
   public Account getAccount(@PathParam("accountNumber") Long accountNumber) {
     try {
@@ -68,8 +67,6 @@ public class AccountResource {
   }
 
   @POST
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Produces(MediaType.APPLICATION_JSON)
   // A transaction should be created for this operation.
   //   A transaction is necessary here because any exception from within the method needs
   //   to result in a “rollback” of any proposed database changes before they’re committed.
@@ -92,7 +89,6 @@ public class AccountResource {
 
   @PUT
   @Path("{accountNumber}/withdrawal")
-  @Produces(MediaType.APPLICATION_JSON)
   @Transactional
   public Account withdrawal(@PathParam("accountNumber") Long accountNumber, String amount) {
     Account account;
@@ -114,7 +110,6 @@ public class AccountResource {
 
   @PUT
   @Path("{accountNumber}/deposit")
-  @Produces(MediaType.APPLICATION_JSON)
   @Transactional
   public Account deposit(@PathParam("accountNumber") Long accountNumber, String amount) {
     Account account;
