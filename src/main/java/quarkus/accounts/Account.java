@@ -4,20 +4,10 @@ import java.math.BigDecimal;
 import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedQuery;
-import javax.persistence.SequenceGenerator;
 
 // Indicates the POJO is a JPA entity.
 @Entity
-// Defines a named query to retrieve all accounts, and orders the result by accountNumber.
-@NamedQuery(name = "Accounts.findAll", query = "SELECT a FROM Account a ORDER BY a.accountNumber")
-// Finding accounts that match accountNumber.
-@NamedQuery(
-    name = "Accounts.findByAccountNumber",
-    query =
-        "SELECT a FROM Account a WHERE a.accountNumber = :accountNumber ORDER BY a.accountNumber")
 public class Account {
 
   // Constructing instances directly is not needed when using JPA.
@@ -25,16 +15,7 @@ public class Account {
   // When using JPA, the fields can be marked private instead of public.
 
   @Id
-  // Creates a sequence generator for the id field, starting with the number 10.
-  //   Starting at 10 provides space to import some records on startup for testing.
-  @SequenceGenerator(
-      name = "accountsSequence",
-      sequenceName = "accounts_id_seq",
-      allocationSize = 1,
-      initialValue = 10)
-  // Uses the sequence generator from the previous line to specify
-  // where the generated value comes from for the primary key.
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "accountsSequence")
+  @GeneratedValue
   private Long id;
 
   private Long accountNumber;

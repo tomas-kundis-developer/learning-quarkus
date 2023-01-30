@@ -5,8 +5,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -24,25 +22,20 @@ import javax.ws.rs.ext.Provider;
 
 // Quarkus defaults JAX-RS resources to @Singleton
 @Path("/accounts")
-// Indicates the response and request are converted to JSON
+// @Produces, @Consumes indicate that response and request are converted to JSON
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class AccountResource {
 
   @Inject
-  EntityManager entityManager;
+  AccountRepository accountRepository;
 
   /**
    * Returns a Set of Account objects.
    */
   @GET
   public List<Account> allAccounts() {
-    return entityManager
-        // Tells the entityManager to use the named query "Accounts.findAll" defined on Account
-        //   and that the expected results will be of the Account type.
-        .createNamedQuery("Accounts.findAll", Account.class)
-        // Converts the results from the database into a List of Account instances.
-        .getResultList();
+    return accountRepository.listAll();
   }
 
   @GET
@@ -50,20 +43,13 @@ public class AccountResource {
   @Path("/{accountNumber}")
   // @PathParam maps the accountNumber URL parameter into the accountNumber method parameter.
   public Account getAccount(@PathParam("accountNumber") Long accountNumber) {
-    try {
-      return entityManager
-          // Uses the "Accounts.findByAccountNumber" named query.
-          .createNamedQuery("Accounts.findByAccountNumber", Account.class)
-          // Passes the parameter into the query, setting the name of the parameter in the query
-          //   and passing the value.
-          .setParameter("accountNumber", accountNumber)
-          // For a given accountNumber, there should only be one account,
-          //   so requests the return of a single Account instance.
-          .getSingleResult();
-    } catch (NoResultException e) {
-      // When there is no account and converts it to a WebApplicationException.
+    Account account = accountRepository.findByAccountNumber(accountNumber);
+
+    if (account == null) {
       throw new WebApplicationException("Account with " + accountNumber + " does not exist.", 404);
     }
+
+    return account;
   }
 
   @POST
@@ -80,10 +66,7 @@ public class AccountResource {
       throw new WebApplicationException("Id was invalidly set on request.", 400);
     }
 
-    // Adding it to the persistent context for committing to the database
-    //   at the completion of the transaction, in this case, createAccount().
-    entityManager.persist(account);
-
+    accountRepository.persist(account);
     return Response.status(201).entity(account).build();
   }
 
@@ -91,16 +74,15 @@ public class AccountResource {
   @Path("{accountNumber}/withdrawal")
   @Transactional
   public Account withdrawal(@PathParam("accountNumber") Long accountNumber, String amount) {
-    Account account;
-    try {
-      // Retrieving the account puts the instance into the persistence context as a managed object.
-      account = getAccount(accountNumber);
-    } catch (NoResultException e) {
+    Account account = accountRepository.findByAccountNumber(accountNumber);
+
+    if (account == null) {
       throw new WebApplicationException("Account with " + accountNumber + " does not exist.", 404);
     }
 
     if (account.getAccountStatus().equals(AccountStatus.OVERDRAWN)) {
-      throw new WebApplicationException("Account is overdrawn, no further withdrawals permitted",
+      throw new WebApplicationException(
+          "Account is overdrawn, no further withdrawals permitted",
           409);
     }
 
@@ -112,10 +94,9 @@ public class AccountResource {
   @Path("{accountNumber}/deposit")
   @Transactional
   public Account deposit(@PathParam("accountNumber") Long accountNumber, String amount) {
-    Account account;
-    try {
-      account = getAccount(accountNumber);
-    } catch (NoResultException e) {
+    Account account = accountRepository.findByAccountNumber(accountNumber);
+
+    if (account == null) {
       throw new WebApplicationException("Account with " + accountNumber + " does not exist.", 404);
     }
 
@@ -127,10 +108,9 @@ public class AccountResource {
   @Path("{accountNumber}")
   @Transactional
   public Response closeAccount(@PathParam("accountNumber") Long accountNumber) {
-    Account account;
-    try {
-      account = getAccount(accountNumber);
-    } catch (NoResultException e) {
+    Account account = accountRepository.findByAccountNumber(accountNumber);
+
+    if (account == null) {
       throw new WebApplicationException("Account with " + accountNumber + " does not exist.", 404);
     }
 

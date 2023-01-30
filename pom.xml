@@ -40,10 +40,10 @@
 
         <!-- Database -->
 
-        <!-- Hibernate implementation of JPA -->
+        <!-- Panache Repository with Hibernate ORM -->
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-hibernate-orm</artifactId>
+            <artifactId>quarkus-hibernate-orm-panache</artifactId>
         </dependency>
 
         <!-- PostgreSQL JDBC driver -->
