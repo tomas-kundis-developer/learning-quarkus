@@ -24,19 +24,18 @@ import org.junit.jupiter.api.TestMethodOrder;
 @QuarkusTest
 // Start an H2 database prior to the tests being executed.
 @QuarkusTestResource(H2DatabaseTestResource.class)
-// Defines the test execution order.
+// Along with @Order defines the test execution order.
 @TestMethodOrder(OrderAnnotation.class)
 class AccountResourceTest {
 
-  // Defines the test execution order.
-  @Order(1)
   @Test
+  @Order(1)
   void testRetrieveAll() {
     // With JUnit 5, test methods don’t need to be public.
+
     // Issues an HTTP GET request to /accounts URL
     Response result = given()
-        .when()
-        .get("/accounts")
+        .when().get("/accounts")
         .then()
         // Verifies the response had a 200 status code
         .statusCode(200)
@@ -53,21 +52,18 @@ class AccountResourceTest {
     // Extracts the JSON array and converts it to a list of Account objects
     List<Account> accounts = result.jsonPath().getList("$");
 
-    // Asserts
     assertThat(accounts, not(empty()));
     assertThat(accounts, hasSize(8));
   }
 
-  @Order(2)
   @Test
+  @Order(2)
   void testGetAccount() {
     Account account = given()
-        .when()
-        .get("/accounts/{accountNumber}", 444666)
+        .when().get("/accounts/{accountNumber}", 444666)
         .then()
         .statusCode(200)
-        .extract()
-        .as(Account.class);
+        .extract().as(Account.class);
 
     assertThat(account.getAccountNumber(), equalTo(444666L));
     assertThat(account.getCustomerName(), equalTo("Billie Piper"));
@@ -76,8 +72,8 @@ class AccountResourceTest {
     assertThat(account.getAccountStatus(), equalTo(AccountStatus.OPEN));
   }
 
-  @Order(3)
   @Test
+  @Order(3)
   void testCreateAccount() {
 
     Account newAccount = new Account();
@@ -90,22 +86,19 @@ class AccountResourceTest {
     Account returnedAccount = given()
         .contentType(ContentType.JSON)
         .body(newAccount)
-        .when()
-        .post("/accounts")
+        .when().post("/accounts")
         .then()
-        // 201, indicating it was created successfully.
-        .statusCode(201)
-        .extract()
-        .as(Account.class);
+        .statusCode(201) // 201 indicates it was created successfully.
+        .extract().as(Account.class);
 
     assertThat(returnedAccount, notNullValue());
-    // !!! Set id returned from the database to test Account equivalency.
+
+    // Set id returned from database in order to test Account equivalency.
     newAccount.setId(returnedAccount.getId());
     assertThat(returnedAccount, equalTo(newAccount));
 
     Response response = given()
-        .when()
-        .get("/accounts/")
+        .when().get("/accounts/")
         .then()
         .statusCode(200)
         .body(
@@ -123,20 +116,19 @@ class AccountResourceTest {
     assertThat(accounts, hasSize(9));
   }
 
-  @Order(4)
   @Test
+  @Order(4)
   void testCloseAccount() {
-    given().when()
-        .delete("/accounts/{accountNumber}", 5465)
+    given()
+        .when().delete("/accounts/{accountNumber}", 5465)
         .then()
         .statusCode(204);
 
-    Account account = given().when()
-        .get("/accounts/{accountNumber}", 5465)
+    Account account = given()
+        .when().get("/accounts/{accountNumber}", 5465)
         .then()
         .statusCode(200)
-        .extract()
-        .as(Account.class);
+        .extract().as(Account.class);
 
     assertThat(account.getAccountNumber(), equalTo(5465L));
     assertThat(account.getCustomerName(), equalTo("Alex Trebek"));
@@ -146,65 +138,13 @@ class AccountResourceTest {
   }
 
   @Test
-  @Order(6)
-  void testWithdrawal() {
-    Account beforeWithdraw = given().when()
-        .get("/accounts/{accountNumber}", 78790)
-        .then()
-        .statusCode(200)
-        .extract()
-        .as(Account.class);
-
-    assertThat(beforeWithdraw.getAccountNumber(), equalTo(78790L));
-    assertThat(beforeWithdraw.getCustomerName(), equalTo("Vanna White"));
-    assertThat(beforeWithdraw.getCustomerNumber(), equalTo(444222L));
-    assertThat(beforeWithdraw.getAccountStatus(), equalTo(AccountStatus.OPEN));
-    assertThat(beforeWithdraw.getBalance(), equalTo(new BigDecimal("439.01")));
-
-    BigDecimal withdrawal = new BigDecimal("23.82");
-
-    Account afterWithdraw = given()
-        .contentType(ContentType.JSON)
-        .body(withdrawal.toString())
-        .when()
-        .put("/accounts/{accountNumber}/withdrawal", 78790)
-        .then()
-        .statusCode(200)
-        .extract()
-        .as(Account.class);
-
-    assertThat(afterWithdraw.getAccountNumber(), equalTo(78790L));
-    assertThat(afterWithdraw.getCustomerName(), equalTo("Vanna White"));
-    assertThat(afterWithdraw.getCustomerNumber(), equalTo(444222L));
-    assertThat(afterWithdraw.getAccountStatus(), equalTo(AccountStatus.OPEN));
-    assertThat(afterWithdraw.getBalance(),
-        equalTo(beforeWithdraw.getBalance().subtract(withdrawal)));
-
-    Account account = given()
-        .when().get("/accounts/{accountNumber}", 78790)
-        .then()
-        .statusCode(200)
-        .extract()
-        .as(Account.class);
-
-    assertThat(account.getAccountNumber(), equalTo(78790L));
-    assertThat(account.getCustomerName(), equalTo("Vanna White"));
-    assertThat(account.getCustomerNumber(), equalTo(444222L));
-    assertThat(account.getAccountStatus(), equalTo(AccountStatus.OPEN));
-    assertThat(account.getBalance(), equalTo(beforeWithdraw.getBalance().subtract(withdrawal)));
-  }
-
-
-  @Test
   @Order(5)
-  void testAccountDeposit() {
+  void testDeposit() {
     Account beforeDeposit = given()
-        .when()
-        .get("/accounts/{accountNumber}", 123456789)
+        .when().get("/accounts/{accountNumber}", 123456789)
         .then()
         .statusCode(200)
-        .extract()
-        .as(Account.class);
+        .extract().as(Account.class);
 
     assertThat(beforeDeposit.getAccountNumber(), equalTo(123456789L));
     assertThat(beforeDeposit.getCustomerName(), equalTo("Debbie Hall"));
@@ -217,12 +157,10 @@ class AccountResourceTest {
     Account afterDeposit = given()
         .contentType(ContentType.JSON)
         .body(deposit.toString())
-        .when()
-        .put("/accounts/{accountNumber}/deposit", 123456789)
+        .when().put("/accounts/{accountNumber}/deposit", 123456789)
         .then()
         .statusCode(200)
-        .extract()
-        .as(Account.class);
+        .extract().as(Account.class);
 
     assertThat(afterDeposit.getAccountNumber(), equalTo(123456789L));
     assertThat(afterDeposit.getCustomerName(), equalTo("Debbie Hall"));
@@ -234,8 +172,7 @@ class AccountResourceTest {
         .when().get("/accounts/{accountNumber}", 123456789)
         .then()
         .statusCode(200)
-        .extract()
-        .as(Account.class);
+        .extract().as(Account.class);
 
     assertThat(account.getAccountNumber(), equalTo(123456789L));
     assertThat(account.getCustomerName(), equalTo("Debbie Hall"));
@@ -245,9 +182,54 @@ class AccountResourceTest {
   }
 
   @Test
+  @Order(6)
+  void testWithdrawal() {
+    Account beforeWithdraw = given()
+        .when().get("/accounts/{accountNumber}", 78790)
+        .then()
+        .statusCode(200)
+        .extract().as(Account.class);
+
+    assertThat(beforeWithdraw.getAccountNumber(), equalTo(78790L));
+    assertThat(beforeWithdraw.getCustomerName(), equalTo("Vanna White"));
+    assertThat(beforeWithdraw.getCustomerNumber(), equalTo(444222L));
+    assertThat(beforeWithdraw.getAccountStatus(), equalTo(AccountStatus.OPEN));
+    assertThat(beforeWithdraw.getBalance(), equalTo(new BigDecimal("439.01")));
+
+    BigDecimal withdrawal = new BigDecimal("23.82");
+
+    Account afterWithdraw = given()
+        .contentType(ContentType.JSON)
+        .body(withdrawal.toString())
+        .when().put("/accounts/{accountNumber}/withdrawal", 78790)
+        .then()
+        .statusCode(200)
+        .extract().as(Account.class);
+
+    assertThat(afterWithdraw.getAccountNumber(), equalTo(78790L));
+    assertThat(afterWithdraw.getCustomerName(), equalTo("Vanna White"));
+    assertThat(afterWithdraw.getCustomerNumber(), equalTo(444222L));
+    assertThat(afterWithdraw.getAccountStatus(), equalTo(AccountStatus.OPEN));
+    assertThat(afterWithdraw.getBalance(),
+        equalTo(beforeWithdraw.getBalance().subtract(withdrawal)));
+
+    Account account = given()
+        .when().get("/accounts/{accountNumber}", 78790)
+        .then()
+        .statusCode(200)
+        .extract().as(Account.class);
+
+    assertThat(account.getAccountNumber(), equalTo(78790L));
+    assertThat(account.getCustomerName(), equalTo("Vanna White"));
+    assertThat(account.getCustomerNumber(), equalTo(444222L));
+    assertThat(account.getAccountStatus(), equalTo(AccountStatus.OPEN));
+    assertThat(account.getBalance(), equalTo(beforeWithdraw.getBalance().subtract(withdrawal)));
+  }
+
+  @Test
   void testGetAccountFailure() {
-    given().when()
-        .get("/accounts/{accountNumber}", 11)
+    given()
+        .when().get("/accounts/{accountNumber}", 11)
         .then()
         .statusCode(404);
   }
@@ -264,8 +246,7 @@ class AccountResourceTest {
     given()
         .contentType(ContentType.JSON)
         .body(newAccount)
-        .when()
-        .post("/accounts")
+        .when().post("/accounts")
         .then()
         .statusCode(400);
   }
