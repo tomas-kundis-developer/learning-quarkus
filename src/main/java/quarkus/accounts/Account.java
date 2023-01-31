@@ -43,8 +43,7 @@ public class Account {
 
   public void close() {
     accountStatus = AccountStatus.CLOSED;
-    // @TODO 2023-01-24 TOKU: BigDecimal.ZERO?
-    balance = BigDecimal.valueOf(0);
+    balance = BigDecimal.ZERO;
   }
 
   public void withdrawFunds(BigDecimal amount) {
