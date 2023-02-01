@@ -50,7 +50,7 @@ class AccountResourceTest {
         .response();
 
     // Extracts the JSON array and converts it to a list of Account objects
-    List<AccountLombok> accounts = result.jsonPath().getList("$");
+    List<AccountJpa> accounts = result.jsonPath().getList("$");
 
     assertThat(accounts, not(empty()));
     assertThat(accounts, hasSize(8));
@@ -59,11 +59,11 @@ class AccountResourceTest {
   @Test
   @Order(2)
   void testGetAccount() {
-    AccountLombok account = given()
+    AccountJpa account = given()
         .when().get("/accounts/{accountNumber}", 444666)
         .then()
         .statusCode(200)
-        .extract().as(AccountLombok.class);
+        .extract().as(AccountJpa.class);
 
     assertThat(account.getAccountNumber(), equalTo(444666L));
     assertThat(account.getCustomerName(), equalTo("Billie Piper"));
@@ -76,20 +76,20 @@ class AccountResourceTest {
   @Order(3)
   void testCreateAccount() {
 
-    AccountLombok newAccount = new AccountLombok();
+    AccountJpa newAccount = new AccountJpa();
     newAccount.setAccountNumber(324324L);
     newAccount.setCustomerNumber(112244L);
     newAccount.setCustomerName("Sandy Holmes");
     newAccount.setBalance(new BigDecimal("154.55"));
 
     // Sets the new account object into the body of the HTTP POST.
-    AccountLombok returnedAccount = given()
+    AccountJpa returnedAccount = given()
         .contentType(ContentType.JSON)
         .body(newAccount)
         .when().post("/accounts")
         .then()
         .statusCode(201) // 201 indicates it was created successfully.
-        .extract().as(AccountLombok.class);
+        .extract().as(AccountJpa.class);
 
     assertThat(returnedAccount, notNullValue());
 
@@ -110,7 +110,7 @@ class AccountResourceTest {
         .extract()
         .response();
 
-    List<AccountLombok> accounts = response.jsonPath().getList("$");
+    List<AccountJpa> accounts = response.jsonPath().getList("$");
 
     assertThat(accounts, not(empty()));
     assertThat(accounts, hasSize(9));
@@ -124,11 +124,11 @@ class AccountResourceTest {
         .then()
         .statusCode(204);
 
-    AccountLombok account = given()
+    AccountJpa account = given()
         .when().get("/accounts/{accountNumber}", 5465)
         .then()
         .statusCode(200)
-        .extract().as(AccountLombok.class);
+        .extract().as(AccountJpa.class);
 
     assertThat(account.getAccountNumber(), equalTo(5465L));
     assertThat(account.getCustomerName(), equalTo("Alex Trebek"));
@@ -140,11 +140,11 @@ class AccountResourceTest {
   @Test
   @Order(5)
   void testDeposit() {
-    AccountLombok beforeDeposit = given()
+    AccountJpa beforeDeposit = given()
         .when().get("/accounts/{accountNumber}", 123456789)
         .then()
         .statusCode(200)
-        .extract().as(AccountLombok.class);
+        .extract().as(AccountJpa.class);
 
     assertThat(beforeDeposit.getAccountNumber(), equalTo(123456789L));
     assertThat(beforeDeposit.getCustomerName(), equalTo("Debbie Hall"));
@@ -154,13 +154,13 @@ class AccountResourceTest {
 
     BigDecimal deposit = new BigDecimal("154.98");
 
-    AccountLombok afterDeposit = given()
+    AccountJpa afterDeposit = given()
         .contentType(ContentType.JSON)
         .body(deposit.toString())
         .when().put("/accounts/{accountNumber}/deposit", 123456789)
         .then()
         .statusCode(200)
-        .extract().as(AccountLombok.class);
+        .extract().as(AccountJpa.class);
 
     assertThat(afterDeposit.getAccountNumber(), equalTo(123456789L));
     assertThat(afterDeposit.getCustomerName(), equalTo("Debbie Hall"));
@@ -168,11 +168,11 @@ class AccountResourceTest {
     assertThat(afterDeposit.getAccountStatus(), equalTo(AccountStatus.OPEN));
     assertThat(afterDeposit.getBalance(), equalTo(beforeDeposit.getBalance().add(deposit)));
 
-    AccountLombok account = given()
+    AccountJpa account = given()
         .when().get("/accounts/{accountNumber}", 123456789)
         .then()
         .statusCode(200)
-        .extract().as(AccountLombok.class);
+        .extract().as(AccountJpa.class);
 
     assertThat(account.getAccountNumber(), equalTo(123456789L));
     assertThat(account.getCustomerName(), equalTo("Debbie Hall"));
@@ -184,11 +184,11 @@ class AccountResourceTest {
   @Test
   @Order(6)
   void testWithdrawal() {
-    AccountLombok beforeWithdraw = given()
+    AccountJpa beforeWithdraw = given()
         .when().get("/accounts/{accountNumber}", 78790)
         .then()
         .statusCode(200)
-        .extract().as(AccountLombok.class);
+        .extract().as(AccountJpa.class);
 
     assertThat(beforeWithdraw.getAccountNumber(), equalTo(78790L));
     assertThat(beforeWithdraw.getCustomerName(), equalTo("Vanna White"));
@@ -198,13 +198,13 @@ class AccountResourceTest {
 
     BigDecimal withdrawal = new BigDecimal("23.82");
 
-    AccountLombok afterWithdraw = given()
+    AccountJpa afterWithdraw = given()
         .contentType(ContentType.JSON)
         .body(withdrawal.toString())
         .when().put("/accounts/{accountNumber}/withdrawal", 78790)
         .then()
         .statusCode(200)
-        .extract().as(AccountLombok.class);
+        .extract().as(AccountJpa.class);
 
     assertThat(afterWithdraw.getAccountNumber(), equalTo(78790L));
     assertThat(afterWithdraw.getCustomerName(), equalTo("Vanna White"));
@@ -213,11 +213,11 @@ class AccountResourceTest {
     assertThat(afterWithdraw.getBalance(),
         equalTo(beforeWithdraw.getBalance().subtract(withdrawal)));
 
-    AccountLombok account = given()
+    AccountJpa account = given()
         .when().get("/accounts/{accountNumber}", 78790)
         .then()
         .statusCode(200)
-        .extract().as(AccountLombok.class);
+        .extract().as(AccountJpa.class);
 
     assertThat(account.getAccountNumber(), equalTo(78790L));
     assertThat(account.getCustomerName(), equalTo("Vanna White"));
@@ -236,7 +236,7 @@ class AccountResourceTest {
 
   @Test
   void testCreateAccountFailure() {
-    AccountLombok newAccount = new AccountLombok();
+    AccountJpa newAccount = new AccountJpa();
     newAccount.setId(12L);
     newAccount.setAccountNumber(90909L);
     newAccount.setCustomerNumber(888898L);

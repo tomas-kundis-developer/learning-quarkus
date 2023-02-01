@@ -4,17 +4,16 @@ import java.math.BigDecimal;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-/**
- * {@link Account} Lombok's alternative.
- */
 @Entity
+@Table(name = "account")
 @Data
 @NoArgsConstructor
-public class AccountLombok {
+public class AccountJpa {
 
   // Constructing instances directly is not needed when using JPA.
 

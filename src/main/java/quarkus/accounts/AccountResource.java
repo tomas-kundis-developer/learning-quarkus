@@ -27,26 +27,23 @@ import javax.ws.rs.ext.Provider;
 @Consumes(MediaType.APPLICATION_JSON)
 public class AccountResource {
 
-  //  @Inject
-  //  AccountRepository accountRepository;
-
   @Inject
-  AccountLombokRepository accountLombokRepository;
+  AccountJpaRepository accountJpaRepository;
 
   /**
    * Returns a Set of Account objects.
    */
   @GET
-  public List<AccountLombok> allAccounts() {
-    return accountLombokRepository.listAll();
+  public List<AccountJpa> allAccounts() {
+    return accountJpaRepository.listAll();
   }
 
   @GET
   // Defines the name of the parameter on the URL path
   @Path("/{accountNumber}")
   // @PathParam maps the accountNumber URL parameter into the accountNumber method parameter.
-  public AccountLombok getAccount(@PathParam("accountNumber") Long accountNumber) {
-    AccountLombok account = accountLombokRepository.findByAccountNumber(accountNumber);
+  public AccountJpa getAccount(@PathParam("accountNumber") Long accountNumber) {
+    AccountJpa account = accountJpaRepository.findByAccountNumber(accountNumber);
 
     if (account == null) {
       throw new WebApplicationException("Account with " + accountNumber + " does not exist.", 404);
@@ -60,24 +57,20 @@ public class AccountResource {
   //   A transaction is necessary here because any exception from within the method needs
   //   to result in a “rollback” of any proposed database changes before they’re committed.
   @Transactional
-  public Response createAccount(AccountLombok account) {
-    // if (account.getAccountNumber() == null) {
-    //   throw new WebApplicationException("No Account number specified.", 400);
-    // }
-
+  public Response createAccount(AccountJpa account) {
     if (account.getId() != null) {
       throw new WebApplicationException("Id was invalidly set on request.", 400);
     }
 
-    accountLombokRepository.persist(account);
+    accountJpaRepository.persist(account);
     return Response.status(201).entity(account).build();
   }
 
   @PUT
   @Path("{accountNumber}/withdrawal")
   @Transactional
-  public AccountLombok withdrawal(@PathParam("accountNumber") Long accountNumber, String amount) {
-    AccountLombok account = accountLombokRepository.findByAccountNumber(accountNumber);
+  public AccountJpa withdrawal(@PathParam("accountNumber") Long accountNumber, String amount) {
+    AccountJpa account = accountJpaRepository.findByAccountNumber(accountNumber);
 
     if (account == null) {
       throw new WebApplicationException("Account with " + accountNumber + " does not exist.", 404);
@@ -96,8 +89,8 @@ public class AccountResource {
   @PUT
   @Path("{accountNumber}/deposit")
   @Transactional
-  public AccountLombok deposit(@PathParam("accountNumber") Long accountNumber, String amount) {
-    AccountLombok account = accountLombokRepository.findByAccountNumber(accountNumber);
+  public AccountJpa deposit(@PathParam("accountNumber") Long accountNumber, String amount) {
+    AccountJpa account = accountJpaRepository.findByAccountNumber(accountNumber);
 
     if (account == null) {
       throw new WebApplicationException("Account with " + accountNumber + " does not exist.", 404);
@@ -111,7 +104,7 @@ public class AccountResource {
   @Path("{accountNumber}")
   @Transactional
   public Response closeAccount(@PathParam("accountNumber") Long accountNumber) {
-    AccountLombok account = accountLombokRepository.findByAccountNumber(accountNumber);
+    AccountJpa account = accountJpaRepository.findByAccountNumber(accountNumber);
 
     if (account == null) {
       throw new WebApplicationException("Account with " + accountNumber + " does not exist.", 404);
