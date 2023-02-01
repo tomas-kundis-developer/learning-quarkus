@@ -60,6 +60,12 @@
             <artifactId>quarkus-jdbc-postgresql</artifactId>
         </dependency>
 
+        <!-- Java MongoDB drivers (including synchronous and reactive versions) -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-mongodb-client</artifactId>
+        </dependency>
+
         <!-- Test -->
 
         <dependency>
