@@ -25,7 +25,7 @@ import javax.ws.rs.ext.Provider;
 // @Produces, @Consumes indicate that response and request are converted to JSON
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class AccountResource {
+public class AccountJpaResource {
 
   @Inject
   AccountJpaRepository accountJpaRepository;

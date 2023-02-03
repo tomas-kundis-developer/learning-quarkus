@@ -26,7 +26,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 @QuarkusTestResource(H2DatabaseTestResource.class)
 // Along with @Order defines the test execution order.
 @TestMethodOrder(OrderAnnotation.class)
-class AccountResourceTest {
+class AccountJpaResourceTest {
 
   @Test
   @Order(1)
