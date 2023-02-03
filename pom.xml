@@ -66,6 +66,12 @@
             <artifactId>quarkus-mongodb-client</artifactId>
         </dependency>
 
+        <!-- Panache Repository / Active Record with MongoDB -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-mongodb-panache</artifactId>
+        </dependency>
+
         <!-- Test -->
 
         <dependency>
